@@ -1,3 +1,5 @@
+from urllib.parse import quote
+
 import boto3
 import logging
 import os
@@ -5,7 +7,7 @@ import oss2
 
 
 def upload_file(relative_path: str, *, content_type: str = None, bucket_path: str = None, delete: bool = True,
-                new_filename: str = None, config: dict = None) -> str:
+                new_filename: str = None, config: dict) -> str:
     """
     Upload a file to a bucket
     <call method> upload_file('gelm2uat', 'testing/test.html', 'temporary/data')
@@ -34,7 +36,7 @@ def upload_file(relative_path: str, *, content_type: str = None, bucket_path: st
             url = f'{cloud_url.format(cloud_bucket)}{bucket_path}'
     elif cloud_provider == "alibaba":
         if upload_file_alibaba(cloud_bucket, relative_path, bucket_path, content_type=content_type, config=config):
-            url = f"{cloud_url.format(cloud_bucket)}{bucket_path}"
+            url = f"{cloud_url.format(cloud_bucket)}{quote(bucket_path)}"
     else:
         logging.error(f"Invalid 'cloud_provider': {cloud_provider}")
         return url

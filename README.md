@@ -13,6 +13,7 @@ The current process sends an attachment to user only when user request the file.
 ## Objective:
 1. Convert all links to attachment_id provided by Facebook
 2. Using asynchronous access
+3. Migrate from dev bucket to production bucket
 
 ## Tools used:
 1. aiohttp

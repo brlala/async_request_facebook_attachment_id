@@ -13,3 +13,17 @@ The current process sends an attachment to user only when user request the file.
 ## Objective:
 1. Convert all links to attachment_id provided by Facebook
 2. Using asynchronous access
+
+## Tools used:
+1. aiohttp
+2. aiofiles
+3. Python
+
+## Process Breakdown:
+1. Get all URLs
+2. Download all URLs (async)
+3. Upload to new cloud bucket (blocking)
+4. Upload to Facebook for attachment ID (async)
+5. Modify database entries
+
+p/s The program's semaphore is set at 8, can be increased or lowered depending on the network stability

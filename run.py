@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+import re
 from pprint import PrettyPrinter
 from urllib.parse import unquote
 
@@ -71,12 +72,12 @@ def remove_attachment_id_from_flow(flow_collection, url):
     Remove attachment_id from old collection and update url with new bucket
     """
     filename = os.path.split(url)[-1]
-    query = {"flow.data.url": Regex(f".*{filename}$", "i")}
+    query = {"flow.data.url": Regex(f".*{re.escape(filename)}$", "i")}
     docs = flow_collection.find(query)
     for doc in docs:
         flows = doc['flow']
         for flow in flows:
-            if flow['type'] == 'image' and flow['data']['url'].endswith(filename):
+            if flow['type'] in ['image', 'video'] and flow['data']['url'].endswith(filename):
                 flow['data']['url'] = url
                 flow['data'].pop('attachment_id', None)
         flow_collection.replace_one({"_id": doc['_id']}, doc)
@@ -96,7 +97,7 @@ async def bound_download(url, *, semaphore, session, config, save_collection, fl
             attachment_id = await upload_file_to_facebook(url, session=session, config=config)
             insert_attachment_into_database(save_collection, {"url": url, "attachment_id": attachment_id})
             remove_attachment_id_from_flow(flow_collection, url)
-            return attachment_id
+            return url, attachment_id
 
 
 async def download_to_local(url: str, save_location: str, *, session):
@@ -140,7 +141,7 @@ async def main():
     flow_collection = database['flow']
     attachment_collection = database['attachment']
     urls = get_attachment_urls(flow_collection)
-    semaphore = asyncio.Semaphore(10)
+    semaphore = asyncio.Semaphore(8)
     async with aiohttp.ClientSession() as session:
         futures = (
             bound_download(url, semaphore=semaphore, session=session, config=config,

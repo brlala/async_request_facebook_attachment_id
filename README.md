@@ -9,7 +9,7 @@ The current process sends an attachment to user only when user request the file.
 2. Create an additional collection in mongo using URL as a primary key.
 
 ## Problem Encountered:
-1. There are more than 1000 links in our database for each client, to upload each of them synchronously will take a long time. (IO bound)
+1. There are a few hundread links in our database for each client(each with file size 300KB-15MB), to upload each of them synchronously will take a long time. (IO bound)
 
 ## Objective:
 1. Convert all links to attachment_id provided by Facebook

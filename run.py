@@ -32,6 +32,9 @@ class MongoDatabase:
 
 
 def get_attachment_urls(collection: Collection):
+    """
+    Return a list of urls from collections
+    """
     pipeline = [{"$match": {"is_active": True,
                             "flow.data.url": {"$exists": True},
                             "flow.data.attachment_id": {"$exists": True}}},
@@ -49,13 +52,16 @@ def get_attachment_urls(collection: Collection):
     return urls
 
 
-async def check_url_valid(url, *, session):
+async def check_url_valid(url: str, *, session) -> None:
+    """
+    Check if URL is valid and exist
+    """
     async with session.head(url) as resp:
         return {"status": resp.status,
                 "url": url}
 
 
-def insert_attachment_into_database(collection, entry: dict):
+def insert_attachment_into_database(collection: Collection, entry: dict) -> None:
     doc = collection.find_one({"url": entry['url']})
     if doc:
         doc['facebook']['attachment_id'] = entry['attachment_id']
@@ -67,7 +73,7 @@ def insert_attachment_into_database(collection, entry: dict):
         print(f"Completed: {entry['url']}")
 
 
-def remove_attachment_id_from_flow(flow_collection, url):
+def remove_attachment_id_from_flow(flow_collection: Collection, url: str) -> None:
     """
     Remove attachment_id from old collection and update url with new bucket
     """
@@ -84,6 +90,9 @@ def remove_attachment_id_from_flow(flow_collection, url):
 
 
 async def bound_download(url, *, semaphore, session, config, save_collection, flow_collection):
+    """
+    Using semaphore to limit the amount of connections, main method
+    """
     async with semaphore:
         result = await check_url_valid(url, session=session)
         if result['status'] != 200:
@@ -100,7 +109,10 @@ async def bound_download(url, *, semaphore, session, config, save_collection, fl
             return url, attachment_id
 
 
-async def download_to_local(url: str, save_location: str, *, session):
+async def download_to_local(url: str, save_location: str, *, session) -> None:
+    """
+    This downloads the file to a local directory in chunks
+    """
     print(f"downloading: {url}")
     async with session.get(url, timeout=0) as resp:
         try:
@@ -112,14 +124,21 @@ async def download_to_local(url: str, save_location: str, *, session):
             print(e)
 
 
-def reupload_to_new_bucket(save_location, config):
-    # this method is blocking
+def reupload_to_new_bucket(save_location: str, config: dict) -> str:
+    """
+    Uploading the files to new bucket
+    :return: url
+    """
     print(f"uploading: {save_location}")
     url = upload_file(save_location, config=config)
     return url
 
 
-async def upload_file_to_facebook(save_location: str, *, session, config):
+async def upload_file_to_facebook(save_location: str, *, session, config) -> str:
+    """
+    Upload files to facebook
+    :return: attachment_id
+    """
     print(f"getting attachment id: {save_location}")
     extension = os.path.splitext(save_location)[-1]
     if extension in ['.jpg', '.png', '.gif', '.jpeg']:
@@ -135,6 +154,9 @@ async def upload_file_to_facebook(save_location: str, *, session, config):
 
 
 async def main():
+    """
+    Main method to glue up the methods
+    """
     config = init_config()
     mongo = MongoDatabase()
     database = mongo.init_database(config)
@@ -148,7 +170,7 @@ async def main():
                            save_collection=attachment_collection, flow_collection=flow_collection)
             for url in urls)
         results = await asyncio.gather(*futures)
-        pp.pprint(results)
+    pp.pprint(results)
 
 
 if __name__ == "__main__":

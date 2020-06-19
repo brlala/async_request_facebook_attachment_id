@@ -21,9 +21,10 @@ The current process sends an attachment to user only when user request the file.
 
 ## Process Breakdown:
 1. Get all URLs
-2. Download all URLs (async)
-3. Upload to new cloud bucket (blocking)
-4. Upload to Facebook for attachment ID (async)
-5. Modify database entries
+2. Filter valid and working URLs
+3. Download all URLs (async)
+4. Upload to new cloud bucket (blocking)
+5. Upload to Facebook for attachment ID (async)
+6. Modify database entries
 
-p/s The program's semaphore is set at 8, can be increased or lowered depending on the network stability
+p/s The program's **semaphore** is set at 8, can be increased or lowered depending on the network stability

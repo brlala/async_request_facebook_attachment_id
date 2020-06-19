@@ -1,5 +1,4 @@
 import mimetypes
-from urllib.parse import urlencode
 
 
 async def upload_facebook_attachment(attachment_type, url: str, retries=5, *, config, session):

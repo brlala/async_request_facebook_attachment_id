@@ -1,0 +1,10 @@
+{
+  "mongo_url": "mongodb://host:password@url:27017",
+  "abbreviation": "abbr",
+  "cloud_provider": "alibaba",
+  "cloud_storage_url": "https://{}.oss-ap-southeast-3.aliyuncs.com/",
+  "cloud_bucket": "bucket name",
+  "cloud_access_key_id": "****",
+  "cloud_secret_access_key": "****",
+  "facebook_page_access_token": "****"
+}
